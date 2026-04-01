@@ -293,7 +293,8 @@ function TurbofanEngine({
 function Scene(props: EngineDiagram3DProps) {
   return (
     <>
-      <ambientLight intensity={0.25} color="#334455" />
+      <color attach="background" args={["#0d1a2e"]} />
+      <ambientLight intensity={0.5} color="#4466aa" />
       <directionalLight
         position={[4, 5, 3]}
         intensity={1.8}
@@ -313,10 +314,10 @@ function Scene(props: EngineDiagram3DProps) {
         args={[10, 10]}
         cellSize={0.5}
         cellThickness={0.5}
-        cellColor="#1a2a3a"
+        cellColor="#2a3a55"
         sectionSize={2}
         sectionThickness={1}
-        sectionColor="#2a3f55"
+        sectionColor="#3a5570"
         fadeDistance={8}
         fadeStrength={1}
         followCamera={false}
@@ -339,7 +340,10 @@ export function EngineDiagram3D(props: EngineDiagram3DProps) {
   return (
     <div
       className="w-full h-full rounded-t overflow-hidden"
-      style={{ background: "oklch(8% 0.02 230)" }}
+      style={{
+        background:
+          "linear-gradient(135deg, oklch(18% 0.06 240) 0%, oklch(12% 0.04 260) 50%, oklch(15% 0.05 220) 100%)",
+      }}
     >
       <Suspense
         fallback={
