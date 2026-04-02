@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -27,7 +26,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { EngineConfig } from "./backend.d.ts";
 import { EngineDiagram3D } from "./components/EngineDiagram3D";
@@ -337,9 +336,9 @@ function LeftPanel({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <Wind className="w-4 h-4 text-primary" />
         <span className="text-xs font-semibold tracking-widest uppercase text-foreground">
           Engine Parameters
@@ -349,168 +348,166 @@ function LeftPanel({
         </Badge>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="px-3 py-3 space-y-3">
-          {/* Altitude */}
-          <div className="bg-muted/20 border border-border rounded p-3 space-y-2">
-            <span className="text-[10px] tracking-widest uppercase text-muted-foreground">
-              ISA Altitude
-            </span>
-            <Select value={altitude} onValueChange={handleAltitude}>
-              <SelectTrigger
-                data-ocid="altitude.select"
-                className="h-7 text-xs bg-input border-border text-foreground"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {ISA_TABLE.map((entry, i) => (
-                  <SelectItem
-                    key={entry.label}
-                    value={String(i)}
-                    className="text-xs"
-                  >
-                    {entry.label} — {(entry.pressure / 1000).toFixed(1)} kPa /{" "}
-                    {entry.temp} K
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="text-[10px] text-muted-foreground">
-              T = {ISA_TABLE[Number(altitude)]?.temp} K &nbsp;|&nbsp; P ={" "}
-              {ISA_TABLE[Number(altitude)]?.pressure.toLocaleString()} Pa
-            </div>
+      <div className="px-3 py-3 space-y-3">
+        {/* Altitude */}
+        <div className="bg-muted/20 border border-border rounded p-3 space-y-2">
+          <span className="text-[10px] tracking-widest uppercase text-muted-foreground">
+            ISA Altitude
+          </span>
+          <Select value={altitude} onValueChange={handleAltitude}>
+            <SelectTrigger
+              data-ocid="altitude.select"
+              className="h-7 text-xs bg-input border-border text-foreground"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              {ISA_TABLE.map((entry, i) => (
+                <SelectItem
+                  key={entry.label}
+                  value={String(i)}
+                  className="text-xs"
+                >
+                  {entry.label} — {(entry.pressure / 1000).toFixed(1)} kPa /{" "}
+                  {entry.temp} K
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="text-[10px] text-muted-foreground">
+            T = {ISA_TABLE[Number(altitude)]?.temp} K &nbsp;|&nbsp; P ={" "}
+            {ISA_TABLE[Number(altitude)]?.pressure.toLocaleString()} Pa
           </div>
-
-          {/* Basic Thrust */}
-          <Section title="Basic Thrust" badge="6 params">
-            <ParamSlider
-              label="Mass Flow"
-              unit="kg/s"
-              value={params.massFlow}
-              min={50}
-              max={500}
-              step={1}
-              onChange={(v) => onParamChange("massFlow", v)}
-              ocid="mass_flow"
-            />
-            <ParamSlider
-              label="Exhaust Velocity"
-              unit="m/s"
-              value={params.exhaustVelocity}
-              min={200}
-              max={2000}
-              step={1}
-              onChange={(v) => onParamChange("exhaustVelocity", v)}
-              ocid="exhaust_velocity"
-            />
-            <ParamSlider
-              label="Flight Speed"
-              unit="m/s"
-              value={params.flightSpeed}
-              min={0}
-              max={900}
-              step={1}
-              onChange={(v) => onParamChange("flightSpeed", v)}
-              ocid="flight_speed"
-            />
-            <ParamSlider
-              label="Exhaust Pressure"
-              unit="Pa"
-              value={params.exhaustPressure}
-              min={90000}
-              max={200000}
-              step={100}
-              onChange={(v) => onParamChange("exhaustPressure", v)}
-              ocid="exhaust_pressure"
-            />
-            <ParamSlider
-              label="Ambient Pressure"
-              unit="Pa"
-              value={params.ambientPressure}
-              min={50000}
-              max={101325}
-              step={100}
-              onChange={(v) => onParamChange("ambientPressure", v)}
-              ocid="ambient_pressure"
-            />
-            <ParamSlider
-              label="Exit Area"
-              unit="m²"
-              value={params.exitArea}
-              min={0.1}
-              max={2.0}
-              step={0.01}
-              onChange={(v) => onParamChange("exitArea", v)}
-              ocid="exit_area"
-            />
-          </Section>
-
-          {/* Turbofan Cycle */}
-          <Section title="Turbofan Cycle" badge="6 params" defaultOpen={false}>
-            <ParamSlider
-              label="Bypass Ratio (BPR)"
-              unit=""
-              value={params.bypassRatio}
-              min={0}
-              max={12}
-              step={0.1}
-              onChange={(v) => onParamChange("bypassRatio", v)}
-              ocid="bypass_ratio"
-            />
-            <ParamSlider
-              label="Overall Pressure Ratio"
-              unit=""
-              value={params.overallPressureRatio}
-              min={10}
-              max={50}
-              step={0.5}
-              onChange={(v) => onParamChange("overallPressureRatio", v)}
-              ocid="opr"
-            />
-            <ParamSlider
-              label="Turbine Inlet Temp"
-              unit="K"
-              value={params.turbineInletTemp}
-              min={1200}
-              max={2000}
-              step={10}
-              onChange={(v) => onParamChange("turbineInletTemp", v)}
-              ocid="tit"
-            />
-            <ParamSlider
-              label="Fan Pressure Ratio"
-              unit=""
-              value={params.fanPressureRatio}
-              min={1.2}
-              max={2.5}
-              step={0.05}
-              onChange={(v) => onParamChange("fanPressureRatio", v)}
-              ocid="fan_pr"
-            />
-            <ParamSlider
-              label="Compressor η_is"
-              unit=""
-              value={params.compressorEfficiency}
-              min={0.75}
-              max={0.95}
-              step={0.01}
-              onChange={(v) => onParamChange("compressorEfficiency", v)}
-              ocid="comp_eff"
-            />
-            <ParamSlider
-              label="Turbine η_is"
-              unit=""
-              value={params.turbineEfficiency}
-              min={0.75}
-              max={0.95}
-              step={0.01}
-              onChange={(v) => onParamChange("turbineEfficiency", v)}
-              ocid="turb_eff"
-            />
-          </Section>
         </div>
-      </ScrollArea>
+
+        {/* Basic Thrust */}
+        <Section title="Basic Thrust" badge="6 params">
+          <ParamSlider
+            label="Mass Flow"
+            unit="kg/s"
+            value={params.massFlow}
+            min={50}
+            max={500}
+            step={1}
+            onChange={(v) => onParamChange("massFlow", v)}
+            ocid="mass_flow"
+          />
+          <ParamSlider
+            label="Exhaust Velocity"
+            unit="m/s"
+            value={params.exhaustVelocity}
+            min={200}
+            max={2000}
+            step={1}
+            onChange={(v) => onParamChange("exhaustVelocity", v)}
+            ocid="exhaust_velocity"
+          />
+          <ParamSlider
+            label="Flight Speed"
+            unit="m/s"
+            value={params.flightSpeed}
+            min={0}
+            max={900}
+            step={1}
+            onChange={(v) => onParamChange("flightSpeed", v)}
+            ocid="flight_speed"
+          />
+          <ParamSlider
+            label="Exhaust Pressure"
+            unit="Pa"
+            value={params.exhaustPressure}
+            min={90000}
+            max={200000}
+            step={100}
+            onChange={(v) => onParamChange("exhaustPressure", v)}
+            ocid="exhaust_pressure"
+          />
+          <ParamSlider
+            label="Ambient Pressure"
+            unit="Pa"
+            value={params.ambientPressure}
+            min={50000}
+            max={101325}
+            step={100}
+            onChange={(v) => onParamChange("ambientPressure", v)}
+            ocid="ambient_pressure"
+          />
+          <ParamSlider
+            label="Exit Area"
+            unit="m²"
+            value={params.exitArea}
+            min={0.1}
+            max={2.0}
+            step={0.01}
+            onChange={(v) => onParamChange("exitArea", v)}
+            ocid="exit_area"
+          />
+        </Section>
+
+        {/* Turbofan Cycle */}
+        <Section title="Turbofan Cycle" badge="6 params" defaultOpen={false}>
+          <ParamSlider
+            label="Bypass Ratio (BPR)"
+            unit=""
+            value={params.bypassRatio}
+            min={0}
+            max={12}
+            step={0.1}
+            onChange={(v) => onParamChange("bypassRatio", v)}
+            ocid="bypass_ratio"
+          />
+          <ParamSlider
+            label="Overall Pressure Ratio"
+            unit=""
+            value={params.overallPressureRatio}
+            min={10}
+            max={50}
+            step={0.5}
+            onChange={(v) => onParamChange("overallPressureRatio", v)}
+            ocid="opr"
+          />
+          <ParamSlider
+            label="Turbine Inlet Temp"
+            unit="K"
+            value={params.turbineInletTemp}
+            min={1200}
+            max={2000}
+            step={10}
+            onChange={(v) => onParamChange("turbineInletTemp", v)}
+            ocid="tit"
+          />
+          <ParamSlider
+            label="Fan Pressure Ratio"
+            unit=""
+            value={params.fanPressureRatio}
+            min={1.2}
+            max={2.5}
+            step={0.05}
+            onChange={(v) => onParamChange("fanPressureRatio", v)}
+            ocid="fan_pr"
+          />
+          <ParamSlider
+            label="Compressor η_is"
+            unit=""
+            value={params.compressorEfficiency}
+            min={0.75}
+            max={0.95}
+            step={0.01}
+            onChange={(v) => onParamChange("compressorEfficiency", v)}
+            ocid="comp_eff"
+          />
+          <ParamSlider
+            label="Turbine η_is"
+            unit=""
+            value={params.turbineEfficiency}
+            min={0.75}
+            max={0.95}
+            step={0.01}
+            onChange={(v) => onParamChange("turbineEfficiency", v)}
+            ocid="turb_eff"
+          />
+        </Section>
+      </div>
     </div>
   );
 }
@@ -559,9 +556,9 @@ function CenterPanel({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <Zap className="w-4 h-4 text-accent" />
         <span className="text-xs font-semibold tracking-widest uppercase text-foreground">
           Performance Dashboard
@@ -569,7 +566,7 @@ function CenterPanel({
       </div>
 
       {/* 3D Engine Diagram */}
-      <div className="shrink-0 h-64 border-b border-border">
+      <div className="h-64 border-b border-border">
         <EngineDiagram3D
           massFlow={params.massFlow}
           turbineInletTemp={params.turbineInletTemp}
@@ -578,188 +575,186 @@ function CenterPanel({
         />
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="px-4 py-4 space-y-4">
-          {/* Big thrust readout */}
-          <div className="border border-border rounded bg-muted/20 p-4 text-center">
-            <div className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">
-              Net Thrust
-            </div>
-            <motion.div
-              key={Math.round(perf.netThrustKN * 10)}
-              initial={{ scale: 0.97, opacity: 0.7 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.15 }}
+      <div className="px-4 py-4 space-y-4">
+        {/* Big thrust readout */}
+        <div className="border border-border rounded bg-muted/20 p-4 text-center">
+          <div className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">
+            Net Thrust
+          </div>
+          <motion.div
+            key={Math.round(perf.netThrustKN * 10)}
+            initial={{ scale: 0.97, opacity: 0.7 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span
+              className={`text-5xl font-bold tabular-nums font-mono ${thrustColor}`}
             >
-              <span
-                className={`text-5xl font-bold tabular-nums font-mono ${thrustColor}`}
-              >
-                {perf.netThrustKN.toFixed(2)}
-              </span>
-              <span className="text-lg text-muted-foreground ml-2">kN</span>
-            </motion.div>
+              {perf.netThrustKN.toFixed(2)}
+            </span>
+            <span className="text-lg text-muted-foreground ml-2">kN</span>
+          </motion.div>
 
-            {/* Target progress */}
-            <div className="mt-3 space-y-1">
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>0 kN</span>
-                <span>TARGET: {TARGET} kN</span>
-                <span>{TARGET * 1.5} kN</span>
-              </div>
-              <Progress
-                data-ocid="thrust.loading_state"
-                value={thrustPct}
-                className={`h-2 bg-secondary ${progressColor}`}
-              />
-              <div className="text-[10px] text-muted-foreground text-right">
-                {thrustPct.toFixed(1)}% of {TARGET} kN target
-              </div>
+          {/* Target progress */}
+          <div className="mt-3 space-y-1">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>0 kN</span>
+              <span>TARGET: {TARGET} kN</span>
+              <span>{TARGET * 1.5} kN</span>
             </div>
-
-            {/* Status */}
-            <div className="mt-2">
-              {perf.netThrustKN >= TARGET ? (
-                <Badge
-                  data-ocid="thrust.success_state"
-                  className="bg-success/20 text-success border-success/30 text-[10px]"
-                >
-                  ✓ TARGET MET — +{(perf.netThrustKN - TARGET).toFixed(1)} kN
-                  margin
-                </Badge>
-              ) : (
-                <Badge
-                  data-ocid="thrust.error_state"
-                  className="bg-destructive/20 text-destructive border-destructive/30 text-[10px]"
-                >
-                  ✗ {(TARGET - perf.netThrustKN).toFixed(1)} kN SHORT OF TARGET
-                </Badge>
-              )}
+            <Progress
+              data-ocid="thrust.loading_state"
+              value={thrustPct}
+              className={`h-2 bg-secondary ${progressColor}`}
+            />
+            <div className="text-[10px] text-muted-foreground text-right">
+              {thrustPct.toFixed(1)}% of {TARGET} kN target
             </div>
           </div>
 
-          {/* Metric grid */}
-          <div className="grid grid-cols-2 gap-2">
-            <MetricCard
-              label="Specific Thrust"
-              value={perf.specificThrust.toFixed(1)}
-              unit="N·s/kg"
-              color="text-primary"
-            />
-            <MetricCard
-              label="TSFC"
-              value={perf.tsfc.toFixed(4)}
-              unit="kg/s/kN"
-              color="text-accent"
-            />
-            <MetricCard
-              label="Thermal Eff."
-              value={(perf.thermalEff * 100).toFixed(1)}
-              unit="%"
-              color="text-primary"
-            />
-            <MetricCard
-              label="Propulsive Eff."
-              value={(perf.propEff * 100).toFixed(1)}
-              unit="%"
-              color="text-accent"
-            />
-            <MetricCard
-              label="Overall Eff."
-              value={(perf.overallEff * 100).toFixed(1)}
-              unit="%"
-              color="text-success"
-            />
-            <MetricCard
-              label="Fuel Flow"
-              value={perf.fuelFlow.toFixed(2)}
-              unit="kg/s"
-              color="text-muted-foreground"
-            />
-          </div>
-
-          <Separator className="border-border" />
-
-          {/* Config Manager */}
-          <div className="space-y-2">
-            <div className="text-[10px] tracking-widest uppercase text-muted-foreground flex items-center gap-1">
-              <Save className="w-3 h-3" /> Config Manager
-            </div>
-            <div className="flex gap-2">
-              <Input
-                data-ocid="config.input"
-                placeholder="Config name..."
-                value={configName}
-                onChange={(e) => setConfigName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                className="flex-1 h-7 text-xs bg-input border-border text-foreground placeholder:text-muted-foreground/60"
-              />
-              <Button
-                data-ocid="config.save_button"
-                size="sm"
-                onClick={handleSave}
-                disabled={saveConfig.isPending}
-                className="h-7 px-3 text-xs bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30"
+          {/* Status */}
+          <div className="mt-2">
+            {perf.netThrustKN >= TARGET ? (
+              <Badge
+                data-ocid="thrust.success_state"
+                className="bg-success/20 text-success border-success/30 text-[10px]"
               >
-                {saveConfig.isPending ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Save className="w-3 h-3" />
-                )}
-              </Button>
-            </div>
-
-            {/* Config list */}
-            {configsLoading ? (
-              <div
-                data-ocid="config.loading_state"
-                className="text-[11px] text-muted-foreground text-center py-2"
-              >
-                Loading configs...
-              </div>
-            ) : configs.length === 0 ? (
-              <div
-                data-ocid="config.empty_state"
-                className="text-[11px] text-muted-foreground text-center py-3 border border-dashed border-border rounded"
-              >
-                No saved configs
-              </div>
+                ✓ TARGET MET — +{(perf.netThrustKN - TARGET).toFixed(1)} kN
+                margin
+              </Badge>
             ) : (
-              <div className="space-y-1" data-ocid="config.list">
-                {configs.map((name, i) => (
-                  <div
-                    key={name}
-                    data-ocid={`config.item.${i + 1}`}
-                    className="flex items-center justify-between bg-muted/20 border border-border rounded px-2 py-1.5 group"
-                  >
-                    <button
-                      type="button"
-                      className="text-xs text-foreground hover:text-primary transition-colors text-left truncate flex-1"
-                      onClick={async () => {
-                        const cfg = await loadConfig.mutateAsync(name);
-                        onLoadConfig(cfg);
-                        toast.success(`Loaded "${name}"`);
-                      }}
-                    >
-                      {name}
-                    </button>
-                    <button
-                      type="button"
-                      data-ocid={`config.delete_button.${i + 1}`}
-                      onClick={async () => {
-                        await deleteConfig.mutateAsync(name);
-                        toast.success(`Deleted "${name}"`);
-                      }}
-                      className="text-muted-foreground hover:text-destructive transition-colors ml-2 opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <Badge
+                data-ocid="thrust.error_state"
+                className="bg-destructive/20 text-destructive border-destructive/30 text-[10px]"
+              >
+                ✗ {(TARGET - perf.netThrustKN).toFixed(1)} kN SHORT OF TARGET
+              </Badge>
             )}
           </div>
         </div>
-      </ScrollArea>
+
+        {/* Metric grid */}
+        <div className="grid grid-cols-2 gap-2">
+          <MetricCard
+            label="Specific Thrust"
+            value={perf.specificThrust.toFixed(1)}
+            unit="N·s/kg"
+            color="text-primary"
+          />
+          <MetricCard
+            label="TSFC"
+            value={perf.tsfc.toFixed(4)}
+            unit="kg/s/kN"
+            color="text-accent"
+          />
+          <MetricCard
+            label="Thermal Eff."
+            value={(perf.thermalEff * 100).toFixed(1)}
+            unit="%"
+            color="text-primary"
+          />
+          <MetricCard
+            label="Propulsive Eff."
+            value={(perf.propEff * 100).toFixed(1)}
+            unit="%"
+            color="text-accent"
+          />
+          <MetricCard
+            label="Overall Eff."
+            value={(perf.overallEff * 100).toFixed(1)}
+            unit="%"
+            color="text-success"
+          />
+          <MetricCard
+            label="Fuel Flow"
+            value={perf.fuelFlow.toFixed(2)}
+            unit="kg/s"
+            color="text-muted-foreground"
+          />
+        </div>
+
+        <Separator className="border-border" />
+
+        {/* Config Manager */}
+        <div className="space-y-2">
+          <div className="text-[10px] tracking-widest uppercase text-muted-foreground flex items-center gap-1">
+            <Save className="w-3 h-3" /> Config Manager
+          </div>
+          <div className="flex gap-2">
+            <Input
+              data-ocid="config.input"
+              placeholder="Config name..."
+              value={configName}
+              onChange={(e) => setConfigName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSave()}
+              className="flex-1 h-7 text-xs bg-input border-border text-foreground placeholder:text-muted-foreground/60"
+            />
+            <Button
+              data-ocid="config.save_button"
+              size="sm"
+              onClick={handleSave}
+              disabled={saveConfig.isPending}
+              className="h-7 px-3 text-xs bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30"
+            >
+              {saveConfig.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Save className="w-3 h-3" />
+              )}
+            </Button>
+          </div>
+
+          {/* Config list */}
+          {configsLoading ? (
+            <div
+              data-ocid="config.loading_state"
+              className="text-[11px] text-muted-foreground text-center py-2"
+            >
+              Loading configs...
+            </div>
+          ) : configs.length === 0 ? (
+            <div
+              data-ocid="config.empty_state"
+              className="text-[11px] text-muted-foreground text-center py-3 border border-dashed border-border rounded"
+            >
+              No saved configs
+            </div>
+          ) : (
+            <div className="space-y-1" data-ocid="config.list">
+              {configs.map((name, i) => (
+                <div
+                  key={name}
+                  data-ocid={`config.item.${i + 1}`}
+                  className="flex items-center justify-between bg-muted/20 border border-border rounded px-2 py-1.5 group"
+                >
+                  <button
+                    type="button"
+                    className="text-xs text-foreground hover:text-primary transition-colors text-left truncate flex-1"
+                    onClick={async () => {
+                      const cfg = await loadConfig.mutateAsync(name);
+                      onLoadConfig(cfg);
+                      toast.success(`Loaded "${name}"`);
+                    }}
+                  >
+                    {name}
+                  </button>
+                  <button
+                    type="button"
+                    data-ocid={`config.delete_button.${i + 1}`}
+                    onClick={async () => {
+                      await deleteConfig.mutateAsync(name);
+                      toast.success(`Deleted "${name}"`);
+                    }}
+                    className="text-muted-foreground hover:text-destructive transition-colors ml-2 opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -829,9 +824,9 @@ function RightPanel({
   );
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <Cpu className="w-4 h-4 text-primary" />
         <span className="text-xs font-semibold tracking-widest uppercase text-foreground">
           ThrustAI
@@ -843,7 +838,7 @@ function RightPanel({
       </div>
 
       {/* Starter prompts */}
-      <div className="px-3 py-2 border-b border-border shrink-0">
+      <div className="px-3 py-2 border-b border-border">
         <div className="flex flex-wrap gap-1.5">
           {STARTER_PROMPTS.map((p) => (
             <button
@@ -859,64 +854,62 @@ function RightPanel({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-3">
-        <div className="py-3 space-y-3">
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.ts}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
+      <div className="px-3 py-3 space-y-3">
+        {messages.map((msg) => (
+          <motion.div
+            key={msg.ts}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className={`flex ${
+              msg.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-[90%] rounded px-3 py-2 text-[11px] leading-relaxed whitespace-pre-wrap ${
+                msg.role === "user"
+                  ? "bg-primary/20 text-primary border border-primary/20"
+                  : "bg-muted/40 text-foreground border border-border"
               }`}
             >
-              <div
-                className={`max-w-[90%] rounded px-3 py-2 text-[11px] leading-relaxed whitespace-pre-wrap ${
-                  msg.role === "user"
-                    ? "bg-primary/20 text-primary border border-primary/20"
-                    : "bg-muted/40 text-foreground border border-border"
-                }`}
-              >
-                {msg.role === "ai" && (
-                  <div className="flex items-center gap-1 mb-1">
-                    <Cpu className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[9px] text-primary tracking-widest uppercase">
-                      ThrustAI
-                    </span>
-                  </div>
-                )}
-                {msg.text}
+              {msg.role === "ai" && (
+                <div className="flex items-center gap-1 mb-1">
+                  <Cpu className="w-2.5 h-2.5 text-primary" />
+                  <span className="text-[9px] text-primary tracking-widest uppercase">
+                    ThrustAI
+                  </span>
+                </div>
+              )}
+              {msg.text}
+            </div>
+          </motion.div>
+        ))}
+
+        {/* Typing indicator */}
+        <AnimatePresence>
+          {typing && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-start"
+            >
+              <div className="bg-muted/40 border border-border rounded px-3 py-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                  <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                  <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+                </div>
               </div>
             </motion.div>
-          ))}
+          )}
+        </AnimatePresence>
 
-          {/* Typing indicator */}
-          <AnimatePresence>
-            {typing && (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex justify-start"
-              >
-                <div className="bg-muted/40 border border-border rounded px-3 py-2">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
-                    <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
-                    <div className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div ref={scrollRef} />
-        </div>
-      </ScrollArea>
+        <div ref={scrollRef} />
+      </div>
 
       {/* Input */}
-      <div className="px-3 py-3 border-t border-border shrink-0">
+      <div className="px-3 py-3 border-t border-border">
         <div className="flex gap-2">
           <Input
             data-ocid="chat.input"
@@ -974,19 +967,12 @@ export default function App() {
 
   const perf = useMemo(() => calcPerformance(params), [params]);
 
-  useEffect(() => {
-    document.documentElement.style.setProperty("overflow", "hidden");
-    return () => {
-      document.documentElement.style.removeProperty("overflow");
-    };
-  }, []);
-
   return (
-    <div className="h-screen flex flex-col bg-background grid-noise overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background grid-noise">
       <Toaster theme="dark" />
 
       {/* Top bar */}
-      <header className="flex items-center gap-3 px-4 py-2 border-b border-border bg-card/80 backdrop-blur shrink-0">
+      <header className="flex items-center gap-3 px-4 py-2 border-b border-border bg-card/80 backdrop-blur shrink-0 sticky top-0 z-40">
         <Flame className="w-5 h-5 text-accent" />
         <span className="text-sm font-bold tracking-wider uppercase text-foreground">
           ThrustAI
@@ -1021,14 +1007,14 @@ export default function App() {
       </header>
 
       {/* 3-panel workstation */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex flex-1">
         {/* Left Panel */}
-        <div className="w-[280px] xl:w-[300px] shrink-0 border-r border-border bg-card/40 flex flex-col overflow-hidden">
+        <div className="w-[280px] xl:w-[300px] shrink-0 border-r border-border bg-card/40">
           <LeftPanel params={params} onParamChange={handleParamChange} />
         </div>
 
         {/* Center Panel */}
-        <div className="flex-1 border-r border-border bg-card/20 flex flex-col overflow-hidden min-w-0">
+        <div className="flex-1 border-r border-border bg-card/20 min-w-0">
           <CenterPanel
             params={params}
             perf={perf}
@@ -1037,7 +1023,7 @@ export default function App() {
         </div>
 
         {/* Right Panel (AI) */}
-        <div className="w-[300px] xl:w-[320px] shrink-0 bg-card/40 hidden md:flex flex-col overflow-hidden">
+        <div className="w-[300px] xl:w-[320px] shrink-0 bg-card/40 hidden md:block">
           <RightPanel params={params} netThrustKN={perf.netThrustKN} />
         </div>
 
@@ -1050,7 +1036,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 240 }}
-              className="fixed inset-y-0 right-0 w-80 bg-card border-l border-border flex flex-col md:hidden z-50"
+              className="fixed inset-y-0 right-0 w-80 bg-card border-l border-border md:hidden z-50 overflow-y-auto"
             >
               <div className="flex items-center justify-between px-3 py-2 border-b border-border">
                 <span className="text-xs font-semibold text-foreground tracking-widest uppercase">
